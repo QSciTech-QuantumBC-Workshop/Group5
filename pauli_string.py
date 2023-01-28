@@ -69,8 +69,10 @@ class PauliString:
 
         return len(self.z_bits)
 
-    def __mul__(self, other: Union['PauliString', complex, float, int]) -> Union[tuple['PauliString', complex],
-                                                                                 'LinearCombinaisonPauliString']:
+    def __mul__(self, other: Union['PauliString', complex, float, int]) -> Union[
+        tuple['PauliString', complex], 'LinearCombinaisonPauliString']:
+                
+            
         """
         Allow the use of '*' with other PauliString or with a coef (numeric).
 
@@ -87,9 +89,12 @@ class PauliString:
 
         if isinstance(other, PauliString):
             return self.mul_pauli_string(other)
+            
         else:
+            # print('is a number')
             return self.mul_coef(other)
-
+            
+    
     def __rmul__(self, other: Union['PauliString', complex, float, int]) -> Union[tuple['PauliString', float],
                                                                                   'LinearCombinaisonPauliString']:
         """
@@ -120,16 +125,16 @@ class PauliString:
             PauliString: The Pauli string specified by the 'zx_bits'.
         """
 
-        z_bits = x_bits = None
+        # z_bits = x_bits = None
 
-        ################################################################################################################
+        ##############################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        # z_bits = 
-        # x_bits = 
-        ################################################################################################################
+        z_bits = zx_bits[:len(zx_bits)//2]
+        x_bits = zx_bits[len(zx_bits)//2:]
+        ##############################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return cls(z_bits, x_bits)
 
@@ -145,14 +150,25 @@ class PauliString:
             PauliString: The Pauli string specified by the 'pauli_str'.
         """
 
-        z_bits = x_bits = None
-
-        ################################################################################################################
+        
+        ##############################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        ################################################################################################################
+        z_bits = np.array([0]*len(pauli_str) ,dtype = bool)
+        x_bits = np.array([0]*len(pauli_str) ,dtype = bool)
         
-        raise NotImplementedError()
+        for i in range(len(pauli_str)):
+            if pauli_str[-1-i] == 'X':
+                z_bits[i] = False
+                x_bits[i] = True
+            elif pauli_str[-1-i] == 'Y':
+                z_bits[i] = True
+                x_bits[i] = True
+            elif pauli_str[-1-i] == 'Z':
+                z_bits[i] = True
+                x_bits[i] = False
+    ##############################################################################################################
+        # raise NotImplementedError()
         
         return cls(z_bits, x_bits)
 
@@ -165,14 +181,15 @@ class PauliString:
             np.array<bool>: zx_bits representation of the PauliString of length 2n
         """
 
-        zx_bits = None
+        # zx_bits = None
 
-        ################################################################################################################
+        ##############################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        ################################################################################################################
+        zx_bits = np.append(self.z_bits, self.x_bits)        ##############################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        
 
         return zx_bits
 
@@ -185,12 +202,13 @@ class PauliString:
             np.array<bool>: xz_bits representation of the PauliString of length 2n
         """
 
-        ################################################################################################################
+        ##############################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        ################################################################################################################
+        xz_bits = np.append(self.x_bits, self.z_bits)        ##############################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
+        
 
         return xz_bits
 
@@ -211,18 +229,20 @@ class PauliString:
         if len(self) != len(other):
             raise ValueError('PauliString must be of the same length')
 
-        new_z_bits = new_x_bits = phase = None
+        # new_z_bits = new_x_bits = phase = None 
 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        # new_z_bits = 
-        # new_x_bits = 
-        # w = 
-        # phase = (-1j)**w
+        new_z_bits = np.logical_xor(self.z_bits, other.z_bits)
+        new_x_bits = np.logical_xor(self.x_bits, other.x_bits)
+        w = np.dot(1*other.z_bits, 1*self.x_bits) - np.dot(1*other.x_bits, 1*self.z_bits)
+        # print(w)
+        # print(w%4)
+        phase = (-1j)**(w%4)
         ################################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
         
         return self.__class__(new_z_bits, new_x_bits), phase
 
@@ -237,18 +257,18 @@ class PauliString:
             LinearCombinaisonPauliString: A LCPS with only one PauliString and coef.
         """
 
-        coefs = pauli_strings = None
+        # coefs = pauli_strings = None
 
-        ################################################################################################################
+        ############################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        # coefs = 
-        # pauli_strings =
-        ################################################################################################################
+        # coefs = coef
+        # pauli_strings = self
+        ############################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
-        return LinearCombinaisonPauliString(coefs, pauli_strings)
+        return LinearCombinaisonPauliString([coef], [self])
 
     def ids(self) -> NDArray[np.bool_]:
         """
@@ -258,14 +278,15 @@ class PauliString:
             np.array<bool>: True where both z_bits and x_bits are False.
         """
 
-        ids = None
+        # ids = None
 
-        ################################################################################################################
+        ##############################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        ################################################################################################################
+        ids = np.invert(self.z_bits + self.x_bits)
+        ##############################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return ids
 
@@ -292,17 +313,27 @@ class PauliString:
         Y_MAT = np.array([[0, -1j], [1j, 0]])
         Z_MAT = np.array([[1, 0], [0, -1]])
 
-        matrix = None
+        # matrix = None
 
         ################################################################################################################
         # YOUR CODE HERE (OPTIONAL)
         # TO COMPLETE (after lecture on mapping)
         # Hints : start with
-        # matrix = np.ones((1,1),dtype = np.complex128)
+        matrix = np.ones((1,1), dtype=np.complex128)
         # And then use the np.kron() method to build the matrix
-        ################################################################################################################
+        labels = str(self)
+        for l in reversed(labels):
+            if l == 'I':
+                matrix = np.kron(matrix, I_MAT)
+            elif l == 'X':
+                matrix = np.kron(matrix, X_MAT)
+            elif l == 'Y':
+                matrix = np.kron(matrix, Y_MAT)
+            else:
+                matrix = np.kron(matrix, Z_MAT)
+             ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
         
         return matrix
 
@@ -409,8 +440,10 @@ class LinearCombinaisonPauliString:
         if isinstance(other, LinearCombinaisonPauliString):
             return self.mul_linear_combinaison_pauli_string(other)
         else:
+            # print('is not a LCPS')
             return self.mul_coef(other)
-
+            
+            
     def __rmul__(self, other: 'LinearCombinaisonPauliString') -> 'LinearCombinaisonPauliString':
         """
         Same as __mul__.
@@ -449,17 +482,17 @@ class LinearCombinaisonPauliString:
         if self.n_qubits != other.n_qubits:
             raise ValueError('Can only add with LCPS of identical number of qubits')
 
-        new_coefs = new_pauli_strings = None
+        # new_coefs = new_pauli_strings = None
 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
         # Hints : use np.concatenate
-        # new_coefs = 
-        # new_pauli_strings = 
+        new_coefs = np.concatenate((self.coefs, other.coefs))
+        new_pauli_strings = np.concatenate((self.pauli_strings, other.pauli_strings))
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return self.__class__(new_coefs, new_pauli_strings)
 
@@ -484,19 +517,26 @@ class LinearCombinaisonPauliString:
         if self.n_qubits != other.n_qubits:
             raise ValueError('Can only add with LCPS of identical number of qubits')
 
-        new_coefs = np.zeros((len(self)*len(other),), dtype=np.complex128)
-        new_pauli_strings = np.zeros((len(self)*len(other),), dtype=PauliString)
+                
         
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        ################################################################################################################
+        new_coefs = []
+        new_pauli_strings = []
+        for i in range(len(self)):
+            for j in range(len(other)):
+                aux_string, phase = self.pauli_strings[i] * other.pauli_strings[j]
+                new_coefs = np.append(new_coefs, self.coefs[i] * other.coefs[j] * phase)
+                new_pauli_strings = np.append(new_pauli_strings, aux_string)
+                # print(new_coefs)     
+    ################################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return self.__class__(new_coefs, new_pauli_strings)
 
-    def mul_coef(self, other: 'LinearCombinaisonPauliString') -> 'LinearCombinaisonPauliString':
+    def mul_coef(self, coef: Union[int, float, complex]) -> 'LinearCombinaisonPauliString':
         """
         Multiply the LCPS by a coef (numeric) or an array of the same length.
 
@@ -510,23 +550,22 @@ class LinearCombinaisonPauliString:
             [type]: [description]
         """
 
-        new_coefs = new_pauli_strings = None
+        # new_coefs = new_pauli_strings = None
 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        # new_coefs =
-        # new_pauli_strings = 
+        new_coefs = coef * self.coefs
+        new_pauli_strings = self.pauli_strings
         ################################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return self.__class__(new_coefs, new_pauli_strings)
 
     def to_zx_bits(self) -> NDArray[np.bool_]:
         """
         Build an array that contains all the zx_bits for each PauliString.
-
         Returns:
             np.array<bool>: A 2d array of booleans where each line is the zx_bits of a PauliString.
         """
@@ -536,16 +575,17 @@ class LinearCombinaisonPauliString:
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        ################################################################################################################
+        for i in range(len(self)):
+            zx_bits[i] = self.pauli_strings[i].to_zx_bits()
+            ################################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
         
         return zx_bits
 
     def to_xz_bits(self) -> NDArray[np.bool_]:
         """
         Build an array that contains all the xz_bits for each PauliString.
-
         Returns:
             np.array<bool>: A 2d array of booleans where each line is the xz_bits of a PauliString.
         """
@@ -555,9 +595,11 @@ class LinearCombinaisonPauliString:
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
+        for i in range(len(self)):
+            xz_bits[i] = self.pauli_strings[i].to_xz_bits()
         ################################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return xz_bits
 
@@ -574,9 +616,11 @@ class LinearCombinaisonPauliString:
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        ################################################################################################################
+        for i in range(len(self)):
+            ids[i] = np.invert(self.pauli_strings[i].z_bits + self.pauli_strings[i].z_bits)
+                    ################################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return ids
 
@@ -589,17 +633,26 @@ class LinearCombinaisonPauliString:
             LinearCombinaisonPauliString: LCPS with combined coefficients.
         """
 
-        new_coefs = new_pauli_strings = None
+        # new_coefs = new_pauli_strings = None
 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
         # hint : make use to_zx_bits and np.unique
+        zx_strings = self.to_zx_bits()
+        uniq_str = np.unique(zx_strings, axis=0)
+        new_coefs = np.zeros(len(uniq_str), dtype=complex)
+        new_strings = np.zeros(len(uniq_str), dtype=PauliString)
+        for u in range(len(uniq_str)):
+            new_strings[u] = PauliString.from_zx_bits(uniq_str[u])
+            for z in range(len(zx_strings)):
+                if (zx_strings[z] == uniq_str[u]).all():
+                    new_coefs[u] += self.coefs[z]
         ################################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
-        return self.__class__(new_coefs, new_pauli_strings)
+        return self.__class__(new_coefs, new_strings)
 
     def apply_threshold(self, threshold: float = 1e-6) -> 'LinearCombinaisonPauliString':
         """
@@ -613,15 +666,17 @@ class LinearCombinaisonPauliString:
             LinearCombinaisonPauliString: LCPS without coefficients smaller than threshold.
         """
 
-        new_coefs = new_pauli_strings = None
+        # new_coefs = new_pauli_strings = None
 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
         # Hint : create a np.array<bool> and use this array to get the subset of the lcps where this array is True
+        new_coefs = self.coefs[self.coefs > threshold]
+        new_pauli_strings = self.pauli_strings[self.coefs > threshold]
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return self.__class__(new_coefs, new_pauli_strings)
 
@@ -656,15 +711,17 @@ class LinearCombinaisonPauliString:
             LinearCombinaisonPauliString: Sorted.
         """
 
-        order = None
+        # order = None
 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        # order = 
+        order = self.to_zx_bits() @ 2**np.arange(2*len(self.n_qubits))
+        order = np.argsort(order)
+        print('the order is:', order)
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         new_coefs = self.coefs[order]
         new_pauli_strings = self.pauli_strings[order]
@@ -686,8 +743,10 @@ class LinearCombinaisonPauliString:
         # YOUR CODE HERE (OPTIONAL)
         # TO COMPLETE (after lecture on mapping)
         # Hints : sum all the matrices of all PauliStrings weighted by their coef
+        for i in range(self.n_terms):
+            matrix += self.coefs[i] * self.pauli_strings[i].to_matrix()
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return matrix
