@@ -138,10 +138,10 @@ class OneBodyFermionicHamiltonian(FermionicHamiltonian):
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on second quantization)
         # Hint : make use of np.einsum
-        # new_integrals =
+        new_integrals = np.einsum('ip,jq,pq -> ij' , transform ,np.conjugate(transform) , self.integrals)
         ################################################################################################################
 
-        raise NotImplementedError()
+        #raise NotImplementedError()
 
         return OneBodyFermionicHamiltonian(new_integrals, self.with_spin)
 
@@ -168,17 +168,19 @@ class OneBodyFermionicHamiltonian(FermionicHamiltonian):
         # and we compute ap * am, there will be (2*n_orbs)**2 Coefs and PauliStrings.
         new_coefs = np.zeros(((2*n_orbs)**2,), dtype=np.complex128)
         new_pauli_strings = np.zeros(((2*n_orbs)**2,), dtype=PauliString)
-
-        lcps = None
-
+        lcps = None 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        # lcps =
+        for i in range (n_orbs):
+            for j in range(n_orbs):
+                new_coefs[i*(n_orbs**2)+j*n_orbs:i*(n_orbs**2)+(j+1)*n_orbs ] =  (self.integrals[i,j]*(creation_operators[i] * annihilation_operators[j]).coefs)
+                new_pauli_strings [i*(n_orbs**2)+j*n_orbs:i*(n_orbs**2)+(j+1)*n_orbs] =  (creation_operators[i] * annihilation_operators[j]).pauli_strings
+        lcps =LinearCombinaisonPauliString(new_coefs, new_pauli_strings)
         ################################################################################################################
 
-        raise NotImplementedError()
-
+        #raise NotImplementedError()
+        #print(new_pauli_strings)
         return lcps
 
 
@@ -223,10 +225,10 @@ class TwoBodyFermionicHamiltonian(FermionicHamiltonian):
         # YOUR CODE HERE
         # TO COMPLETE (after lecture second quantization)
         # Hint : make use of np.einsum
-        # new_integrals =
+        new_integrals = np.einsum('ip,jq,kr,ls,pqrs -> ijkl' , transform ,transform,np.conjugate(transform),np.conjugate(transform) , self.integrals)
         ################################################################################################################
 
-        raise NotImplementedError()
+        #raise NotImplementedError()
 
         return TwoBodyFermionicHamiltonian(new_integrals, self.with_spin)
 
@@ -252,16 +254,21 @@ class TwoBodyFermionicHamiltonian(FermionicHamiltonian):
         # and we compute ap * ap * am * am there will be (2*n_orbs)**4 Coefs and PauliStrings
         new_coefs = np.zeros(((2*n_orbs)**4,), dtype=np.complex128)
         new_pauli_strings = np.zeros(((2*n_orbs)**4,), dtype=PauliString)
-
         lcps = None
-
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        # lcps =
+        for i in range (n_orbs):
+            for j in range(n_orbs):
+                for k in range (n_orbs):
+                    for l in range (n_orbs):
+                        a , b = i*(n_orbs**5)+j*(n_orbs**4)+(k)*(n_orbs**3)+l*(n_orbs**2),i*(n_orbs**5)+j*(n_orbs**4)+(k)*(n_orbs**3)+(l+1)*(n_orbs**2)
+                        new_coefs[a:b] =  0.5*self.integrals[i,j,k,l]*(creation_operators[i] * creation_operators[j]*annihilation_operators[k]*annihilation_operators[l]).coefs
+                        new_pauli_strings [a:b] =  ((creation_operators[i] * creation_operators[j])*(annihilation_operators[k]*annihilation_operators[l])).pauli_strings
+        lcps =LinearCombinaisonPauliString(new_coefs, new_pauli_strings)
         ################################################################################################################
 
-        raise NotImplementedError()
+        #raise NotImplementedError()
 
         return lcps
         
@@ -311,7 +318,7 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
 
         return cls(one_body, two_body, with_spin)
 
-    @PendingDeprecationWarning
+    #@PendingDeprecationWarning
     @classmethod
     def from_pyscf_mol(cls, mol) -> 'MolecularFermionicHamiltonian':
         """
@@ -325,7 +332,7 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
             TwoBody terms.
         """
 
-        h1_mo = h2_mo = None
+        #h1_mo = h2_mo = None
 
         ################################################################################################################
         # YOUR CODE HERE
@@ -335,17 +342,22 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         
         # Diagonalisation of ovlp and build a transformation toward an orthonormal basis (ao2oo).
         # TO COMPLETE
-
+        sigma_o , U_o = np.linalg.eigh( mol.intor('int1e_ovlp'))
+        R_o = np.einsum('m,mp,mi -> pi' , sigma_o**(-0.5) , np.conjugate(U_o), U_o)
         # Build h1 in AO basis and transform it into OO basis.
         # TO COMPLETE
-
+        h1_ao = mol.intor('int1e_kin')+mol.intor('int1e_nuc')
+        h2_ao = mol.intor('int2e')
+        h1_oo = np.einsum('ip,jq,pq -> ij' , R_o ,np.conjugate(R_o) , h1_ao)
+        h2_oo = np.einsum('ip,jq,kr,ls,pqrs -> ijkl' , R_o ,R_o,np.conjugate(R_o),np.conjugate(R_o) , h2_ao)
         # Find a transformation from OO basis toward MO basis where h1 is diagonal and eigenvalues are in growing order.
         # TO COMPLETE
-
+        sigma_p , R_p = np.linalg.eigh( h1_oo)
+        R_p = R_p[np.argsort(sigma_p),:]
         # Transform h1 and h2 from AO to MO basis
         # TO COMPLETE
-        # h1_mo = 
-        # h2_mo = 
+        h1_mo = np.diag(np.sort(sigma_p))
+        h2_mo = np.einsum('ip,jq,kr,ls,pqrs -> ijkl' , R_p ,R_p,np.conjugate(R_p),np.conjugate(R_p) , h2_oo)
         ################################################################################################################
 
         # Build the one and two body Hamiltonians
@@ -353,7 +365,7 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         two_body = TwoBodyFermionicHamiltonian(h2_mo)
 
         # Recommended : Make sure that h1_mo is diagonal and that its eigenvalues are sorted in growing order.
-        raise NotImplementedError()
+        #raise NotImplementedError()
 
         return cls(one_body, two_body)
 
@@ -445,14 +457,19 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
             LinearCombinaisonPauliString: Qubit operator reprensentation of the MolecularFermionicHamiltonian.
         """     
 
-        out = None
+        #out = None
 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
+        h1_lcps = self.one_body.to_linear_combinaison_pauli_string(creation_operators, annihilation_operators)
+        h1_lcps = h1_lcps.apply_threshold().combine().apply_threshold().sort()
+        h2_lcps = self.two_body.to_linear_combinaison_pauli_string(creation_operators, annihilation_operators)
+        h2_lcps = h2_lcps.apply_threshold().combine().apply_threshold().sort()
+        out = h1_lcps + h2_lcps
         ################################################################################################################
 
-        raise NotImplementedError()
+        #raise NotImplementedError()
 
         return out
 

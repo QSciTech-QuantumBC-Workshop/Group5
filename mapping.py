@@ -76,9 +76,14 @@ class JordanWigner(Mapping):
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
         # This is a large piece of the puzzle
+        for i in range(n_qubits):
+            p_i = np.hstack((np.tri(1,n_qubits,k=i,dtype = np.bool_) ,(np.eye(1,n_qubits,k=i,dtype = np.bool_) )))[0]
+            p_r = np.hstack((np.tri(1,n_qubits,k=i-1,dtype = np.bool_) ,(np.eye(1,n_qubits,k=i,dtype = np.bool_) )))[0]                    
+            annihilation_operators.append(0.5*PauliString.from_zx_bits(p_r) + 0.5j*PauliString.from_zx_bits(p_i))
+            creation_operators.append(0.5*PauliString.from_zx_bits(p_r) -0.5j*PauliString.from_zx_bits(p_i))
         ################################################################################################################
 
-        raise NotImplementedError()
+        #raise NotImplementedError()
 
         return creation_operators, annihilation_operators
 
