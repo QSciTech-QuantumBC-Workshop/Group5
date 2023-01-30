@@ -23,10 +23,12 @@ import numpy as np
 
 
 class Mapping:
-
-    def fermionic_creation_annihilation_operators(self, n_qubits: int) -> tuple[list[LinearCombinaisonPauliString],
-                                                                                list[LinearCombinaisonPauliString]]:
+    
+    def fermionic_creation_annihilation_operators(self, n_qubits: int) -> tuple[list[LinearCombinaisonPauliString], list[LinearCombinaisonPauliString]]:
+        
+        
         raise NotImplementedError("abstract base class implementation")
+        
         
     def fermionic_hamiltonian_to_qubit_hamiltonian(self, fermionic_hamiltonian)->LinearCombinaisonPauliString:
         """
@@ -48,15 +50,17 @@ class Mapping:
 
 
 class JordanWigner(Mapping):
+    
     def __init__(self):
+        
         """
         The Jordan-Wigner mapping
         """
 
         self.name = 'jordan-wigner'
 
-    def fermionic_creation_annihilation_operators(self, n_qubits: int) -> tuple[list[LinearCombinaisonPauliString],
-                                                                                list[LinearCombinaisonPauliString]]:
+    def fermionic_creation_annihilation_operators(self, n_qubits: int) -> tuple[list[LinearCombinaisonPauliString], list[LinearCombinaisonPauliString]]:
+        
         """
         Build the LCPS reprensetations for the creation/annihilation operator for each qubit following 
         Jordan-Wigner mapping.
@@ -69,16 +73,25 @@ class JordanWigner(Mapping):
                 operators for each orbital in the form of LinearCombinaisonPauliString.
         """
 
-        creation_operators = list()
-        annihilation_operators = list()
+#         creation_operators = list()
+#         annihilation_operators = list()
         
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
         # This is a large piece of the puzzle
+        a0 = 0.5 * PauliString.from_str('IIIX') + 0.5j * PauliString.from_str('IIIY')
+        a1 = 0.5 * PauliString.from_str('IIXZ') + 0.5j * PauliString.from_str('IIYZ')
+        a2 = 0.5 * PauliString.from_str('IXZZ') + 0.5j * PauliString.from_str('IYZZ')
+        a3 = 0.5 * PauliString.from_str('XZZZ') + 0.5j * PauliString.from_str('YZZZ')
+        A0 = 0.5 * PauliString.from_str('IIIX') + -0.5j * PauliString.from_str('IIIY')
+        A1 = 0.5 * PauliString.from_str('IIXZ') + -0.5j * PauliString.from_str('IIYZ')
+        A2 = 0.5 * PauliString.from_str('IXZZ') + -0.5j * PauliString.from_str('IYZZ')
+        A3 = 0.5 * PauliString.from_str('XZZZ') + -0.5j * PauliString.from_str('YZZZ')
+        creation_operators = [A0, A1, A2, A3]
+        annihilation_operators = [a0, a1, a2, a3]       
         ################################################################################################################
-
-        raise NotImplementedError()
+      
 
         return creation_operators, annihilation_operators
 

@@ -716,7 +716,7 @@ class LinearCombinaisonPauliString:
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        order = self.to_zx_bits() @ 2**np.arange(2*len(self.n_qubits))
+        order = self.to_zx_bits() @ 2**np.arange(2*self.n_qubits)
         order = np.argsort(order)
         print('the order is:', order)
         ################################################################################################################
