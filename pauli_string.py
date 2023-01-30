@@ -672,8 +672,8 @@ class LinearCombinaisonPauliString:
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
         # Hint : create a np.array<bool> and use this array to get the subset of the lcps where this array is True
-        new_coefs = self.coefs[self.coefs > threshold]
-        new_pauli_strings = self.pauli_strings[self.coefs > threshold]
+        new_coefs = self.coefs[abs(self.coefs) > threshold]
+        new_pauli_strings = self.pauli_strings[abs(self.coefs) > threshold]
         ################################################################################################################
 
         # raise NotImplementedError()
