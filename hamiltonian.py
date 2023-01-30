@@ -257,18 +257,28 @@ class TwoBodyFermionicHamiltonian(FermionicHamiltonian):
         n_orbs = self.number_of_orbitals()
         # Since each creation/annihilation operator consist of 2 PauliString for each orbital
         # and we compute ap * ap * am * am there will be (2*n_orbs)**4 Coefs and PauliStrings
-        new_coefs = np.zeros(((2*n_orbs)**4,), dtype=np.complex128)
-        new_pauli_strings = np.zeros(((2*n_orbs)**4,), dtype=PauliString)
+        # new_coefs = np.zeros(((2*n_orbs)**4,), dtype=np.complex128)
+        # new_pauli_strings = np.zeros(((2*n_orbs)**4,), dtype=PauliString)
 
-        lcps = None
+        # lcps = None
 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        # lcps =
+        print(self.integrals.shape)
+        lcps = 0 * PauliString.from_str('IIII')
+        print('# orbitals', n_orbs)
+        for i in range(n_orbs):
+            for j in range(n_orbs):
+                for k in range(n_orbs):
+                    for l in range(n_orbs):
+                        h2 = 0.5 * float(self.integrals[i, j, k, l])
+                        lcps = h2 * (creation_operators[i] * creation_operators[i] *
+                        annihilation_operators[k] * annihilation_operators[l]) + lcps
+                print(self.integrals[i, j, k, l])
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return lcps
         
