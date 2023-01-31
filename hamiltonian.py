@@ -173,9 +173,9 @@ class OneBodyFermionicHamiltonian(FermionicHamiltonian):
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        
-        lcps = 0 * PauliString.from_str('IIII')
-        print('# orbitals', n_orbs)
+        # print(self.integrals)
+        # print('# orbitals', n_orbs)
+        lcps = 0 * PauliString.from_str('IIII')        
         for i in range(n_orbs):
             for j in range(n_orbs):
                 h1 = float(self.integrals[i, j])
@@ -265,17 +265,16 @@ class TwoBodyFermionicHamiltonian(FermionicHamiltonian):
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
-        print(self.integrals.shape)
-        lcps = 0 * PauliString.from_str('IIII')
-        print('# orbitals', n_orbs)
+        # print('# orbitals', n_orbs)
+        # print(self.integrals.shape)
+        lcps = 0 * PauliString.from_str('IIII')        
         for i in range(n_orbs):
             for j in range(n_orbs):
                 for k in range(n_orbs):
                     for l in range(n_orbs):
                         h2 = 0.5 * float(self.integrals[i, j, k, l])
-                        lcps = h2 * (creation_operators[i] * creation_operators[i] *
-                        annihilation_operators[k] * annihilation_operators[l]) + lcps
-                print(self.integrals[i, j, k, l])
+                        lcps = h2 * (creation_operators[i] * creation_operators[j] *
+                        annihilation_operators[k] * annihilation_operators[l]) + lcps                        
         ################################################################################################################
 
         # raise NotImplementedError()
@@ -462,14 +461,16 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
             LinearCombinaisonPauliString: Qubit operator reprensentation of the MolecularFermionicHamiltonian.
         """     
 
-        out = None
+        # out = None
 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
+        out = self.one_body.to_linear_combinaison_pauli_string(creation_operators, annihilation_operators) + \
+              self.two_body.to_linear_combinaison_pauli_string(creation_operators, annihilation_operators)
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return out
 

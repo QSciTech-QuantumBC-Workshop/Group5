@@ -236,9 +236,8 @@ class PauliString:
         # TO COMPLETE (after lecture on mapping)
         new_z_bits = np.logical_xor(self.z_bits, other.z_bits)
         new_x_bits = np.logical_xor(self.x_bits, other.x_bits)
-        w = np.dot(1*other.z_bits, 1*self.x_bits) - np.dot(1*other.x_bits, 1*self.z_bits)
-        # print(w)
-        # print(w%4)
+        w = np.dot(2*other.z_bits, 1*self.x_bits) + np.dot(1*self.x_bits, 1*self.z_bits) + \
+        np.dot(1*other.x_bits, 1*other.z_bits) - np.dot(1*new_x_bits, 1*new_z_bits)
         phase = (-1j)**(w%4)
         ################################################################################################################
         
@@ -264,6 +263,7 @@ class PauliString:
         # TO COMPLETE (after lecture on mapping)
         # coefs = coef
         # pauli_strings = self
+        # phase = (-1j) ** np.dot(1*self.z_bits, 1*self.x_bits)
         ############################################################################################################
 
         # raise NotImplementedError()
@@ -718,7 +718,7 @@ class LinearCombinaisonPauliString:
         # TO COMPLETE (after lecture on mapping)
         order = self.to_zx_bits() @ 2**np.arange(2*self.n_qubits)
         order = np.argsort(order)
-        print('the order is:', order)
+        # print('the order is:', order)
         ################################################################################################################
 
         # raise NotImplementedError()
