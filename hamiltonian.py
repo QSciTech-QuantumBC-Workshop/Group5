@@ -342,18 +342,19 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         
         # Diagonalisation of ovlp and build a transformation toward an orthonormal basis (ao2oo).
         # TO COMPLETE
-        sigma_o , U_o = np.linalg.eigh( mol.intor('int1e_ovlp'))
-        R_o = np.einsum('m,mp,mi -> pi' , sigma_o**(-0.5) , np.conjugate(U_o), U_o)
+        sigma_o , U_o = np.linalg.eig( mol.intor('int1e_ovlp'))
+        R_o = np.einsum('m,mp,mi -> pi' , sigma_o**(-0.5) ,np.conjugate(U_o.T), U_o.T )
         # Build h1 in AO basis and transform it into OO basis.
         # TO COMPLETE
         h1_ao = mol.intor('int1e_kin')+mol.intor('int1e_nuc')
         h2_ao = mol.intor('int2e')
+        h2_ao = np.einsum('ijkl->iklj',h2_ao)
         h1_oo = np.einsum('ip,jq,pq -> ij' , R_o ,np.conjugate(R_o) , h1_ao)
         h2_oo = np.einsum('ip,jq,kr,ls,pqrs -> ijkl' , R_o ,R_o,np.conjugate(R_o),np.conjugate(R_o) , h2_ao)
         # Find a transformation from OO basis toward MO basis where h1 is diagonal and eigenvalues are in growing order.
         # TO COMPLETE
         sigma_p , R_p = np.linalg.eigh( h1_oo)
-        R_p = R_p[np.argsort(sigma_p),:]
+        R_p = R_p.T[np.argsort(sigma_p),:]
         # Transform h1 and h2 from AO to MO basis
         # TO COMPLETE
         h1_mo = np.diag(np.sort(sigma_p))
