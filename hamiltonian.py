@@ -327,7 +327,7 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
 
         return cls(one_body, two_body, with_spin)
 
-    @PendingDeprecationWarning
+    # @PendingDeprecationWarning
     @classmethod
     def from_pyscf_mol(cls, mol) -> 'MolecularFermionicHamiltonian':
         """
@@ -341,7 +341,7 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
             TwoBody terms.
         """
 
-        h1_mo = h2_mo = None
+        # h1_mo = h2_mo = None
 
         ################################################################################################################
         # YOUR CODE HERE
@@ -351,17 +351,26 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         
         # Diagonalisation of ovlp and build a transformation toward an orthonormal basis (ao2oo).
         # TO COMPLETE
-
+        T = mol.intor('int1e_ovlp')
+        sigma, U = np.linalg.eigh(T)
+        R = U.T.conj() @ np.diag(1 / np.sqrt(sigma)) @ U
+        
         # Build h1 in AO basis and transform it into OO basis.
         # TO COMPLETE
+        H1 = mol.intor('int1e_kin') + mol.intor('int1e_nuc')
+        H1 = R @ H1 @ R.T.conj()
+        E, V = np.linalg.eigh(H1)
 
         # Find a transformation from OO basis toward MO basis where h1 is diagonal and eigenvalues are in growing order.
         # TO COMPLETE
+        H2 = mol.intor('int2e')
+        H2 = np.einsum('ip,jq,kr,ls,pqrs -> iklj', R, R, R.conj(), R.conj(), H2)
+        H2 = np.einsum('ip,jq,kr,ls,pqrs -> ijkl', V, V, V.conj(), V.conj(), H2)
 
         # Transform h1 and h2 from AO to MO basis
         # TO COMPLETE
-        # h1_mo = 
-        # h2_mo = 
+        h1_mo = np.diag(E)
+        h2_mo = H2[::-1, ::-1, ::-1, ::-1]
         ################################################################################################################
 
         # Build the one and two body Hamiltonians
@@ -369,7 +378,7 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         two_body = TwoBodyFermionicHamiltonian(h2_mo)
 
         # Recommended : Make sure that h1_mo is diagonal and that its eigenvalues are sorted in growing order.
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return cls(one_body, two_body)
 
