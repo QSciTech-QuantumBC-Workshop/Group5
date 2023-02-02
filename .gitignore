@@ -3,3 +3,8 @@
 .ipynb_checkpoints/hamiltonian-checkpoint.py
 .ipynb_checkpoints/mapping-checkpoint.py
 .ipynb_checkpoints/pauli_string-checkpoint.py
+*.pyc
+.ipynb_checkpoints/activity_vqe-checkpoint.ipynb
+.ipynb_checkpoints/estimator-checkpoint.py
+.ipynb_checkpoints/intro_qiskit-checkpoint.ipynb
+.ipynb_checkpoints/solver-checkpoint.py

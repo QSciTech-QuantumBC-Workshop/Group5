@@ -342,7 +342,7 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         
         # Diagonalisation of ovlp and build a transformation toward an orthonormal basis (ao2oo).
         # TO COMPLETE
-        sigma_o , U_o = np.linalg.eig( mol.intor('int1e_ovlp'))
+        sigma_o , U_o = np.linalg.eigh( mol.intor('int1e_ovlp'))
         R_o = np.einsum('m,mp,mi -> pi' , sigma_o**(-0.5) ,np.conjugate(U_o.T), U_o.T )
         # Build h1 in AO basis and transform it into OO basis.
         # TO COMPLETE
