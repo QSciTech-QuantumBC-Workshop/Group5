@@ -88,7 +88,7 @@ class Estimator:
         t0 = time.time()
         state_circuit = self.prepare_state_circuit(params)
         circuits = self.assemble_circuits(state_circuit)
-
+        
         expectation_value = 0
         ################################################################################################################
         # YOUR CODE HERE
@@ -99,12 +99,19 @@ class Estimator:
         #   3. Estimate the expectation value of the diagonal_observable
         # B. Combine all the results into the expectation value of the observable (e.i. the energy)
         # (Optional) record the result with the record object
-        # (Optional) monitor the time of execution
-        ################################################################################################################
+        # (Optional) monitor the time of execution        
+        for i in range(len(circuits)):
+            job = execute(circuits[i], backend=self.backend, execute_opts=self.execute_opts)
+            result = job.result()
+            counts = result.get_counts(circuits[i])
+            v = self.estimate_diagonal_pauli_string_expectation_value(self.diagonal_observables[i].pauli_strings[0], counts)
+            expectation_value += v * self.diagonal_observables[i].coefs[0]                  ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         eval_time = time.time()-t0
+        print(f'evaluation time = {eval_time} seconds')
+        self.record = expectation_value
 
         return expectation_value
 
@@ -124,9 +131,11 @@ class Estimator:
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on VQE)
+        param_dict = dict(zip(self.varform.parameters, params))
+        state_circuit = self.varform.assign_parameters(param_dict)
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return state_circuit
 
@@ -148,9 +157,15 @@ class Estimator:
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on VQE)
+        state_circuit.barrier(range(self.n_qubits))
+        for i in range(len(self.diagonal_observables)):            
+            qc = state_circuit.compose(self.diagonalizing_circuits[i])
+            qc.measure_all()
+            circuits.append(qc)           
+            
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return circuits
 
@@ -172,9 +187,14 @@ class Estimator:
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on VQE)
+        for i in range(len(state)):
+            if str(diagonal_pauli_string)[i] == 'Z' and state[i] == '1':
+                eigenvalue += 1
+                # print(eigenvalue)
+        eigenvalue = (-1) ** (eigenvalue % 2)
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return eigenvalue
 
@@ -196,9 +216,14 @@ class Estimator:
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on VQE)
+        total = sum(counts.values())
+        for state in counts.keys():
+            l = Estimator.diagonal_pauli_string_eigenvalue(diagonal_pauli_string, state)
+            expectation_value += l * counts[state]
+        expectation_value = expectation_value / total
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return expectation_value
 
@@ -221,9 +246,13 @@ class Estimator:
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on VQE)
+        for i in range(len(diagonal_observable)):
+            v = Estimator.estimate_diagonal_pauli_string_expectation_value(diagonal_observable.pauli_strings[i], counts)
+            expectation_value += diagonal_observable.coefs[i] * v
+            # print(v)
         ################################################################################################################
 
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return expectation_value
 
@@ -242,14 +271,28 @@ class Estimator:
         
         n_qubits = len(pauli_string)
         diagonalizing_circuit = QuantumCircuit(n_qubits)
-        diagonal_pauli_string = None
+        diagonal_pauli_string = ''
 
         ################################################################################################################
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on VQE)
+        for i in range(n_qubits):
+            bit = str(pauli_string)[i]
+            if bit == 'X':
+                diagonalizing_circuit.h(n_qubits - i - 1)
+                diagonal_pauli_string += 'Z'
+            elif bit == 'Y':
+                diagonalizing_circuit.sdg(n_qubits - i - 1)
+                diagonalizing_circuit.h(n_qubits - i - 1)
+                diagonal_pauli_string += 'Z'
+            else:
+                diagonal_pauli_string += bit
+            # print(diagonal_pauli_string)
+
+        PauliString.from_str(diagonal_pauli_string)
         ################################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return diagonalizing_circuit, diagonal_pauli_string
 
@@ -285,9 +328,15 @@ class BasicEstimator(Estimator):
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on VQE)
         # Hint : the next method does the work for 1 PauliString + coef
+        strings = observable.pauli_strings
+        coefs = observable.coefs
+        for i in range(len(observable)):
+            (diagonalizing_circuit, diagonal_pauli_string) = Estimator.diagonalizing_pauli_string_circuit(strings[i])
+            diagonal_observables.append(LinearCombinaisonPauliString([coefs[i]], [diagonal_pauli_string]))
+            diagonalizing_circuits.append(diagonalizing_circuit)
         ################################################################################################################
         
-        raise NotImplementedError()
+        # raise NotImplementedError()
 
         return diagonal_observables, diagonalizing_circuits
 

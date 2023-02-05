@@ -364,8 +364,8 @@ class MolecularFermionicHamiltonian(FermionicHamiltonian):
         # Find a transformation from OO basis toward MO basis where h1 is diagonal and eigenvalues are in growing order.
         # TO COMPLETE
         H2 = mol.intor('int2e')
-        H2 = np.einsum('ip,jq,kr,ls,pqrs -> iklj', R, R, R.conj(), R.conj(), H2)
-        H2 = np.einsum('ip,jq,kr,ls,pqrs -> ijkl', V, V, V.conj(), V.conj(), H2)
+        H2 = np.einsum('ip,jq,kr,ls,pqrs -> ijkl', R, R, R.conj(), R.conj(), H2)
+        H2 = np.einsum('ip,jq,kr,ls,pqrs -> iklj', V, V, V.conj(), V.conj(), H2)
 
         # Transform h1 and h2 from AO to MO basis
         # TO COMPLETE
