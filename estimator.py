@@ -110,7 +110,7 @@ class Estimator:
         # raise NotImplementedError()
 
         eval_time = time.time()-t0
-        print(f'evaluation time = {eval_time} seconds')
+        # print(f'evaluation time = {eval_time} seconds')
         self.record = expectation_value
 
         return expectation_value
