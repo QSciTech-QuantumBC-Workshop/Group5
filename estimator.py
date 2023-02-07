@@ -101,7 +101,8 @@ class Estimator:
         # (Optional) record the result with the record object
         # (Optional) monitor the time of execution        
         for i in range(len(circuits)):
-            job = execute(circuits[i], backend=self.backend, execute_opts=self.execute_opts)
+            job = execute(circuits[i], backend=self.backend, **self.execute_opts)
+            # print(self.execute_opts)
             result = job.result()
             counts = result.get_counts(circuits[i])
             v = self.estimate_diagonal_pauli_string_expectation_value(self.diagonal_observables[i].pauli_strings[0], counts)
