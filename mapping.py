@@ -116,8 +116,13 @@ class Parity(Mapping):
         ################################################################################################################
         # YOUR CODE HERE
         # OPTIONAL
+        for i in range(n_qubits):
+            p_i = np.hstack(((np.eye(1,n_qubits,k=i,dtype = np.bool_) , np.flip(np.tri(1,n_qubits,k=n_qubits-i-1,dtype = np.bool_))  )))[0]
+            p_r = np.hstack(((np.eye(1,n_qubits,k=i-1,dtype = np.bool_) , np.flip(np.tri(1,n_qubits,k=n_qubits-i-1,dtype = np.bool_))   )))[0]                     
+            annihilation_operators.append(0.5*PauliString.from_zx_bits(p_r) + 0.5j*PauliString.from_zx_bits(p_i))
+            creation_operators.append(0.5*PauliString.from_zx_bits(p_r) -0.5j*PauliString.from_zx_bits(p_i))
         ################################################################################################################
 
-        raise NotImplementedError()
+        #raise NotImplementedError()
 
         return creation_operators, annihilation_operators

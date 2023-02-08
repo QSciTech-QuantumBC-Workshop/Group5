@@ -110,6 +110,8 @@ class Estimator:
         #raise NotImplementedError()
 
         eval_time = time.time()-t0
+        
+        print ('Evaluation lasted %.2f seconds' %eval_time)
 
         return expectation_value
 
@@ -363,9 +365,18 @@ class BitwiseCommutingCliqueEstimator(Estimator):
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on VQE)
         # Hint : the next method does the work for 1 PauliString + coef
+        for i in cliques:
+            new_coefs =[]
+            new_pauli_string = []
+            for j in i:
+                diagonalizing_circuit_j, diagonal_pauli_string_j = Estimator.diagonalizing_pauli_string_circuit(j.pauli_strings[0])
+                new_coefs.append(j.coefs[0])
+                new_pauli_string.append(diagonal_pauli_string_j)
+            diagonal_observables.append(LinearCombinaisonPauliString(new_coefs , new_pauli_string))
+            diagonalizing_circuits.append(diagonalizing_circuit_j)
         ################################################################################################################
         
-        raise NotImplementedError()
+        #raise NotImplementedError()
             
         return diagonal_observables, diagonalizing_circuits
 

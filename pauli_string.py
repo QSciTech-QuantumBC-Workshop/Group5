@@ -589,8 +589,8 @@ class LinearCombinaisonPauliString:
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on mapping)
         for i in range (zx_bits.shape[0]):
-            new_pauli_strings.append( PauliString.from_zx_bits(zx_bits[i,:]))
-        if coefs ==1:
+            new_pauli_strings.append( PauliString.from_zx_bits(zx_bits[i]))
+        if np.all(coefs ==1):
             new_coefs = np.ones((zx_bits.shape[0]),dtype = complex)
         else:
             new_coefs= coefs
@@ -712,9 +712,60 @@ class LinearCombinaisonPauliString:
         # This one can be hard to implement
         # Use to_zx_bits
         # Transform all I into Z and look for unique PauliStrings
+        zx_bits = self.to_zx_bits()
+        z_bits , x_bits = np.split(zx_bits,2 , axis = 1)
+        z_bits_new = (~z_bits*~x_bits)
+        replaced_zx= np.hstack ((z_bits_new|z_bits,x_bits))
+        a ,b= np.unique(replaced_zx,axis =0,return_inverse=True)
+        for i in range (len (a)):
+            coefs = self.coefs [  np.where(i == b)]
+            lcps = LinearCombinaisonPauliString.from_zx_bits(zx_bits [ np.where(i == b)],coefs = coefs)
+            cliques.append(lcps)
         ################################################################################################################
 
-        raise NotImplementedError()
+        #raise NotImplementedError()
+
+        return cliques
+        
+    def divide_in_general_commuting_cliques(self) -> list['LinearCombinaisonPauliString']:
+        """
+        Find general commuting cliques in the LCPS.
+
+        Returns:
+            list<LinearCombinaisonPauliString>: List of LCPS where all elements of one LCPS bitwise commute with each
+                                                other.
+        """
+
+        cliques = list()
+
+        ################################################################################################################
+        # YOUR CODE HERE
+        # TO COMPLETE (after activity 3.2)
+        # This one can be hard to implement
+        # Use to_zx_bits
+        # Transform all I into Z and look for unique PauliStrings
+        zx_bits = self.to_zx_bits()
+        coefs = self.coefs
+        remove_index = np.zeros((len(zx_bits),1),dtype = bool)
+        
+        for i in range (len(zx_bits)):
+            if remove_index[i][0] ==False:
+                remove_index[i][0] =True
+                group_coefs = [coefs[i]]
+                group_zx = np.array([zx_bits[i]])
+                member_zx = np.delete(zx_bits , (remove_index.reshape(1,-1)[0]) , axis = 0)
+                member_coef = np.delete(coefs , (remove_index.reshape(1,-1)[0]) , axis = 0)
+                for j in range( len ( member_zx)):
+                    aa =  LinearCombinaisonPauliString.from_zx_bits(group_zx).to_matrix()
+                    bb = LinearCombinaisonPauliString.from_zx_bits(np.array([member_zx[j]])).to_matrix()
+                    if  (np.all((aa@bb - bb@aa) == 0)):
+                        group_coefs.append (member_coef[j])
+                        remove_index [np.where( np.all(zx_bits == member_zx[j] ,axis = 1) == True)[0][0]] = True
+                        group_zx = np.vstack((group_zx, member_zx[j])) 
+                cliques.append(LinearCombinaisonPauliString.from_zx_bits(group_zx,coefs = group_coefs))
+        ################################################################################################################
+
+        #raise NotImplementedError()
 
         return cliques
 

@@ -180,7 +180,6 @@ class OneBodyFermionicHamiltonian(FermionicHamiltonian):
         ################################################################################################################
 
         #raise NotImplementedError()
-        #print(new_pauli_strings)
         return lcps
 
 
