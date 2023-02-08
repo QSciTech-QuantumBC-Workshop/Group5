@@ -22,8 +22,9 @@ import time
 
 import numpy as np
 
-from qiskit import QuantumCircuit, execute
+from qiskit import QuantumCircuit, execute, ClassicalRegister
 from qiskit.providers import Backend
+from qiskit.circuit import Instruction
 
 from pauli_string import PauliString, LinearCombinaisonPauliString
 
@@ -159,9 +160,15 @@ class Estimator:
         # YOUR CODE HERE
         # TO COMPLETE (after lecture on VQE)
         state_circuit.barrier(range(self.n_qubits))
-        for i in range(len(self.diagonal_observables)):            
+        for i in range(len(self.diagonal_observables)):
+            cr = ClassicalRegister(4)
             qc = state_circuit.compose(self.diagonalizing_circuits[i])
-            qc.measure_all()
+            # qc.measure_all()
+            qc.add_register(cr)
+            qc.append(Instruction("measure", 4, 4, []), range(4), range(4))
+            # meas = Instruction("measure", 4, 4, [])
+            # # print(meas)
+            # qc.append(meas, [0, 1, 2, 3], [0, 1, 2, 3])
             circuits.append(qc)           
             
         ################################################################################################################
