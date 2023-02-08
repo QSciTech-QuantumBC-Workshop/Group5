@@ -33,7 +33,8 @@ from numpy.typing import NDArray
 
 
 class Estimator:
-    def __init__(self, varform: QuantumCircuit, backend: Backend, execute_opts={}, record: Optional[object] = None):
+    def __init__(self, varform: QuantumCircuit, backend: Backend, execute_opts={}, record: Optional[object] = None,
+                mitigate: Optional[object] = False):
         """
         An Estimator allows to transform an observable into a callable function. The observable is not set at the 
         initialization. The estimator will build the QuantumCircuit necessary to estimate the expected value of the 
@@ -55,6 +56,7 @@ class Estimator:
         self.execute_opts = execute_opts
 
         self.record = record
+        self.mitigate = mitigate
 
         # To be set attributes
         self.n_qubits = varform.num_qubits
@@ -106,6 +108,20 @@ class Estimator:
             # print(self.execute_opts)
             result = job.result()
             counts = result.get_counts(circuits[i])
+            if self.mitigate:
+                err_matrix = np.asarray(self.execute_opts['noise_model'].to_dict()['errors'][-1]['probabilities'])
+                # print((err_matrix @ np.linalg.inv(err_matrix)).sum().round(), end='')            
+                vec_count = np.zeros(2 ** self.n_qubits)
+                for s in range(2 ** self.n_qubits):
+                    if f'{s:04b}' in counts:
+                        vec_count[s] = counts[f'{s:04b}']                        
+                miti_vec_count = np.linalg.inv(err_matrix) @ vec_count
+                
+                for s in range(2 ** self.n_qubits):
+                    counts[f'{s:04b}'] = miti_vec_count[s]
+                
+            # else:
+            #     print(0, end='')
             v = self.estimate_diagonal_pauli_string_expectation_value(self.diagonal_observables[i].pauli_strings[0], counts)
             expectation_value += v * self.diagonal_observables[i].coefs[0]                  ################################################################################################################
 
@@ -116,7 +132,8 @@ class Estimator:
         self.record = expectation_value
 
         return expectation_value
-
+    
+    
     def prepare_state_circuit(self, params: Union[NDArray, list]) -> QuantumCircuit:
         """
         Assign parameter values to the variational circuit (varfom) to prepare the quantum state.
@@ -165,6 +182,7 @@ class Estimator:
             qc = state_circuit.compose(self.diagonalizing_circuits[i])
             # qc.measure_all()
             qc.add_register(cr)
+            # qc.measure(range(4),range(4))
             qc.append(Instruction("measure", 4, 4, []), range(4), range(4))
             # meas = Instruction("measure", 4, 4, [])
             # # print(meas)
