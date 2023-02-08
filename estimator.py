@@ -379,5 +379,79 @@ class BitwiseCommutingCliqueEstimator(Estimator):
         #raise NotImplementedError()
             
         return diagonal_observables, diagonalizing_circuits
+    
+class GeneralCommutingCliqueEstimator(Estimator):
+    """
+    The General CommutingCliqueEstimator should build 1 quantum circuit and 1 interpreter for each clique of PauliStrings.
+    The interpreter should be 2d array of size (number of cliques ,2**number of qubits).
+    It does exploit the fact that commuting PauliStrings can be evaluated from a common circuit.
+    """
+
+    @staticmethod
+    def diagonal_observables_and_circuits(observable: LinearCombinaisonPauliString) -> tuple[list[LinearCombinaisonPauliString],
+                                                                                             list[QuantumCircuit]]:
+        """
+        ONLY WORKS for H2!! 
+        This method first divide the observable into bitwise commuting cliques. Each commuting clique is then converted
+        into :
+        - A diagonal observable including the associated coefficients
+        - The quantum circuit that performs this diagonalization.
+        The diagonal observables and the quantum circuits are return as two list.
+
+        Args:
+            observable (LinearCombinaisonPauliString): An observable.
+
+        Returns:
+            list<LinearCombinaisonPauliString> : The diagonal observables
+            list<list of QuantumCircuit> : The diagonalizing quantum circuits
+        """
+
+        cliques = observable.divide_in_general_commuting_cliques()
+        diagonal_observables = list()
+        diagonalizing_circuits = list()
+        
+        ################################################################################################################
+        # YOUR CODE HERE
+        # TO COMPLETE (after lecture on VQE)
+        # Hint : the next method does the work for 1 PauliString + coef
+        for i in cliques:
+            new_coefs =[]
+            new_pauli_string = []
+            if len(i) == 11:
+                for j in i:
+                    diagonalizing_circuit_j, diagonal_pauli_string_j = Estimator.diagonalizing_pauli_string_circuit(j.pauli_strings[0])
+                    new_coefs.append(j.coefs[0])
+                    new_pauli_string.append(diagonal_pauli_string_j)
+                diagonal_observables.append(LinearCombinaisonPauliString(new_coefs , new_pauli_string))
+                diagonalizing_circuits.append(diagonalizing_circuit_j)
+            if len(i) ==4:
+                n_qubits = len(i[0].pauli_strings[0])
+                diagonalizing_circuit_j = QuantumCircuit(n_qubits)
+                diagonal_pauli_string = None
+                diagonalizing_circuit_j.cx(0,1)
+                diagonalizing_circuit_j.cx(2,3)
+                diagonalizing_circuit_j.h(0)
+                diagonalizing_circuit_j.h(2)
+                for j in i:
+                    if str(j.pauli_strings[0]) == 'XXXX':
+                        new_pauli_string.append(PauliString.from_str('IZIZ'))
+                        new_coefs.append(j.coefs[0])
+                    if str(j.pauli_strings[0]) == 'YYXX':
+                        new_pauli_string.append(PauliString.from_str('ZZIZ'))
+                        new_coefs.append((j.coefs[0])*-1)
+                    if str(j.pauli_strings[0]) == 'XXYY':
+                        new_pauli_string.append(PauliString.from_str('IZZZ'))
+                        new_coefs.append((j.coefs[0])*-1)
+                    if str(j.pauli_strings[0]) == 'YYYY':
+                        new_pauli_string.append(PauliString.from_str('ZZZZ'))
+                        new_coefs.append(j.coefs[0])
+                diagonal_observables.append(LinearCombinaisonPauliString(new_coefs , new_pauli_string))
+                diagonalizing_circuits.append(diagonalizing_circuit_j)
+        ################################################################################################################
+        
+        #raise NotImplementedError()
+            
+        return diagonal_observables, diagonalizing_circuits
+
 
 
