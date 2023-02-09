@@ -111,9 +111,9 @@ class Estimator:
 
         eval_time = time.time()-t0
         
-        print ('Evaluation lasted %.2f seconds' %eval_time)
+        print("{:.6f}".format(eval_time))
 
-        return expectation_value
+        return expectation_value 
 
     def prepare_state_circuit(self, params: Union[NDArray, list]) -> QuantumCircuit:
         """
